@@ -14,3 +14,7 @@ func NewLogger(serviceName string) *log.Logger {
 	logger := log.New(file, "INFO: ", log.Ldate|log.Ltime|log.Ldate|log.Lshortfile)
 	return logger
 }
+
+//TODO create a struct as a user for helping db and json return
+
+//TODO create a strcut as a posts for helping db and json return

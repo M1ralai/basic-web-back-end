@@ -11,7 +11,7 @@ import (
 func (s *Server) userHandler(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
-		//TODO thats will be for login, will check usrename and password
+		s.userGetHandler(w, r)
 		fmt.Println("get method came")
 	case http.MethodPost:
 		//TODO thats will be for reister, will check CSRF_TOKEN
@@ -20,17 +20,17 @@ func (s *Server) userHandler(w http.ResponseWriter, r *http.Request) {
 		//TODO tahts will check session_id and user's password then delete
 		fmt.Println("delete method came")
 	case http.MethodPatch:
-		userPatchHandler(w, r)
+		s.userPatchHandler(w, r)
 	default:
 		http.Error(w, "503 - unauthorized request", 503)
 		return
 	}
 }
 
-func userPatchHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) userPatchHandler(w http.ResponseWriter, r *http.Request) {
 	var data map[string]any
 
-	//TODO sessionID and CSRF_TOKEN control will be added here
+	//TODO CSRFT_TOKEN control will be added here
 
 	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
@@ -43,6 +43,17 @@ func userPatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sid, err := s.getSessionId(w, r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	uid, _ := sessionPack.Load(sid)
+	if uid != int(userId) {
+		http.Error(w, "unauthorized access denied", http.StatusUnauthorized)
+	}
+
 	newPassowrd, ok := data["newPassword"].(string)
 	if !ok || newPassowrd == "" {
 		http.Error(w, "newPassword must be string", http.StatusBadRequest)
@@ -53,7 +64,7 @@ func userPatchHandler(w http.ResponseWriter, r *http.Request) {
 
 	securityQuestion, _ := data["securityAnswer"].(string)
 
-	err := db.PatchUser(int(userId), newPassowrd, oldPassword, securityQuestion)
+	err = db.PatchUser(int(userId), newPassowrd, oldPassword, securityQuestion)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
@@ -61,6 +72,41 @@ func userPatchHandler(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("user password successfully changed"))
 		return
 	}
+}
+
+// Thats basicly a login function
+func (s *Server) userGetHandler(w http.ResponseWriter, r *http.Request) {
+	var data map[string]any
+
+	//TODO CSRFT_TOKEN control will be added here
+
+	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	username, ok := data["username"].(string)
+	if !ok {
+		http.Error(w, "username must be string", http.StatusBadRequest)
+		return
+	}
+
+	password, ok := data["password"].(string)
+	if !ok {
+		http.Error(w, "password must be string", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := db.LoginUser(username, password)
+
+	sid, err := s.getSessionId(w, r)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	sessionPack.Swap(sid, userID)
 }
 
 //TODO add a posts handler

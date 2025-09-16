@@ -17,4 +17,10 @@ func NewLogger(serviceName string) *log.Logger {
 
 //TODO create a struct as a user for helping db and json return
 
+type User struct {
+	ID       int    `json:"userID" db:"user_id"`
+	Username string `json:"username" db:"username"`
+	Password string `json:"password" db:"password"`
+}
+
 //TODO create a strcut as a posts for helping db and json return

@@ -22,6 +22,7 @@ func NewServer(addr string) *Server {
 }
 
 func (s *Server) RunServer() {
+	go s.periodicSessionClear()
 	//back-end is streaming here
 
 	//TODO when request came from /api/users/:id that wil return this user's data
@@ -29,7 +30,7 @@ func (s *Server) RunServer() {
 
 	//front-end is streaming here
 
-	s.mux.Handle("/", s.requestLogger(http.FileServer(http.Dir(".web/html"))))
+	s.mux.Handle("/", s.requestLogger(s.sessionIdFileServer(http.FileServer(http.Dir(".web/html")))))
 
 	// server is streaming right here
 

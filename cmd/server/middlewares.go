@@ -1,22 +1,25 @@
 package server
 
-import "net/http"
+import (
+	"crypto/rand"
+	"encoding/hex"
+	"net/http"
+	"sync"
+	"time"
+)
 
 //LOGGER MIDDLEWARE START
 
 type loggingResponseWriter struct {
 	http.ResponseWriter
 	statusCode int
-	body       []byte
 }
 
 func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.statusCode = code
-	lrw.ResponseWriter.WriteHeader(code)
 }
 
 func (lrw *loggingResponseWriter) Write(b []byte) (int, error) {
-	lrw.body = append(lrw.body, b...)
 	return lrw.ResponseWriter.Write(b)
 }
 
@@ -29,12 +32,86 @@ func (s *Server) requestLogger(next http.Handler) http.Handler {
 
 		next.ServeHTTP(lrw, r)
 
-		s.logger.Printf("Method: %s, URL: %s, Status: %d, ResponseBody: %s, IP:%s \n",
-			r.Method, r.URL.String(), lrw.statusCode, string(lrw.body), r.RemoteAddr)
+		s.logger.Printf("Method: %s, URL: %s, Status: %d, IP:%s \n",
+			r.Method, r.URL.String(), lrw.statusCode, r.RemoteAddr)
 	})
 }
 
 //LOGGER MIDDLEWARE END
+
+//SESSIONID MIDDLEWARE START
+
+type Session struct {
+	user_id      string
+	expiringTime time.Time
+}
+
+var sessionPack sync.Map
+
+func (s *Server) getSessionId(w http.ResponseWriter, r *http.Request) (string, error) {
+	cookie, err := r.Cookie("sessionID")
+	if err != nil {
+		return "", err
+	}
+	return cookie.Value, nil
+}
+
+func (s *Server) periodicSessionClear() {
+	for {
+		sessionPack.Range(func(key, value any) bool {
+			s := value.(Session)
+			if time.Now().After(s.expiringTime) {
+				sessionPack.Delete(key)
+			}
+			return true
+		})
+		time.Sleep(10 * time.Minute)
+	}
+}
+
+func sessionIdCreator() string {
+	b := make([]byte, 16)
+	rand.Read(b)
+	return hex.EncodeToString(b)
+}
+
+func (s *Server) sessionIdFileServer(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("sessionPack")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				sid := sessionIdCreator()
+				sessionPack.Store(sid, Session{
+					user_id:      "",
+					expiringTime: time.Now().Add(60 * time.Minute),
+				})
+				http.SetCookie(w, &http.Cookie{
+					Name:     "sessionPack",
+					Value:    sid,
+					Path:     "/",
+					HttpOnly: true,
+					Secure:   false,
+					MaxAge:   3600,
+				})
+			} else {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		} else {
+			http.SetCookie(w, &http.Cookie{
+				Name:     "sessionPack",
+				Value:    cookie.Value,
+				Path:     "/",
+				HttpOnly: true,
+				Secure:   false,
+				MaxAge:   3600,
+			})
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+//SESSIONID MIDDLEWARE END
 
 //TODO add a function that creates session_id as a cookie
 

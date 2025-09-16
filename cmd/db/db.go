@@ -19,4 +19,8 @@ func Initdb() {
 
 //TODO add a function that calls from a userHandler's delete side, that will drop a user with tat id
 
-//TODO add a fubnction that calls from a userHandler's patch side, that will change the password of user
+// gets userID oldPassword newPassword and securityAnswer for changing user's password, if oldPassword is empty the nit will check securityAnswer otherwise securithAnswer won't be used
+func PatchUser(userID int, newPassword string, oldPassword string, securityAnswer string) error {
+	return nil
+	//TODO that will change the password of user, all control will be donw on handler side
+}

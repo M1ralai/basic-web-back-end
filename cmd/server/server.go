@@ -25,8 +25,14 @@ func (s *Server) RunServer() {
 	go s.periodicSessionClear()
 	//back-end is streaming here
 
+	//BACK-END USER API START
 	s.mux.Handle("/api/users/", s.requestLogger(s.sessionIdApi(http.HandlerFunc(s.getUserByID))))
 	s.mux.Handle("/api/users", s.requestLogger(s.sessionIdApi(http.HandlerFunc(s.userHandler))))
+	//BADCK-END USER API END
+
+	//BACK-END POST API START
+	s.mux.Handle("/api/posts", s.requestLogger(s.sessionIdApi(http.HandlerFunc(s.postHandler))))
+	//BACK-END POST API END
 
 	//front-end is streaming here
 

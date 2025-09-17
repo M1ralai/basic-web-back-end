@@ -20,7 +20,7 @@ func Initdb() {
 //TODO add a function that calls from a userHandler's delete side, that will drop a user with tat id
 
 // gets userID oldPassword newPassword and securityAnswer for changing user's password, if oldPassword is empty the nit will check securityAnswer otherwise securithAnswer won't be used
-func PatchUser(userID int, newPassword string, oldPassword string, securityAnswer string) error {
+func PatchUser(userID string, newPassword string, oldPassword string, securityAnswer string) error {
 	return nil
 	//TODO that will change the password of user, all control will be here and if there is error that function will return error
 }
@@ -36,6 +36,10 @@ func RegisterUser(username string, password string) error {
 	return nil
 }
 
-func GetUserByID(userID int) *utils.User {
+func GetUserByID(userID string) *utils.User {
 	return nil
+}
+
+func DeleteUser(userID string) {
+	return
 }

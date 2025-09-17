@@ -25,13 +25,13 @@ func (s *Server) RunServer() {
 	go s.periodicSessionClear()
 	//back-end is streaming here
 
-	//TODO when request came from /api/users/:id that wil return this user's data
 	s.mux.Handle("/api/users/", s.requestLogger(s.sessionIdApi(http.HandlerFunc(s.getUserByID))))
 	s.mux.Handle("/api/users", s.requestLogger(s.sessionIdApi(http.HandlerFunc(s.userHandler))))
 
 	//front-end is streaming here
 
 	s.mux.Handle("/", s.requestLogger(s.sessionIdFileServer(http.FileServer(http.Dir(".web/html")))))
+	s.mux.Handle("/js/", s.requestLogger(s.sessionIdFileServer(http.StripPrefix("/js/", http.FileServer(http.Dir(".web/js"))))))
 
 	// server is streaming right here
 

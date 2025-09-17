@@ -43,7 +43,7 @@ func (s *Server) requestLogger(next http.Handler) http.Handler {
 //SESSIONID MIDDLEWARE START
 
 type Session struct {
-	user_id      string
+	userId       string
 	expiringTime time.Time
 }
 
@@ -89,7 +89,7 @@ func (s *Server) sessionIdFileServer(next http.Handler) http.Handler {
 			if err == http.ErrNoCookie {
 				sid := sessionIdCreator()
 				sessionPack.Store(sid, Session{
-					user_id:      "",
+					userId:       "",
 					expiringTime: time.Now().Add(60 * time.Minute),
 				})
 				http.SetCookie(w, &http.Cookie{
@@ -134,10 +134,6 @@ func (s *Server) sessionIdApi(next http.Handler) http.Handler {
 }
 
 //SESSIONID MIDDLEWARE END
-
-//TODO add a function that creates session_id as a cookie
-
-//TODO add a funtcion that checks session_id from a cookie
 
 //TODO add a function that create CSRF_TOKEN for a login page
 

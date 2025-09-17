@@ -26,7 +26,8 @@ func (s *Server) RunServer() {
 	//back-end is streaming here
 
 	//TODO when request came from /api/users/:id that wil return this user's data
-	s.mux.Handle("/api/users", s.requestLogger(http.HandlerFunc(s.userHandler)))
+	s.mux.Handle("/api/users/", s.requestLogger(s.sessionIdApi(http.HandlerFunc(s.getUserByID))))
+	s.mux.Handle("/api/users", s.requestLogger(s.sessionIdApi(http.HandlerFunc(s.userHandler))))
 
 	//front-end is streaming here
 

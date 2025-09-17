@@ -3,6 +3,7 @@ package server
 import (
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"net/http"
 	"sync"
 	"time"
@@ -48,10 +49,16 @@ type Session struct {
 
 var sessionPack sync.Map
 
-func (s *Server) getSessionId(w http.ResponseWriter, r *http.Request) (string, error) {
+func (s *Server) getSessionId(r *http.Request) (string, error) {
 	cookie, err := r.Cookie("sessionID")
 	if err != nil {
 		return "", err
+	}
+
+	_, ok := sessionPack.Load(cookie.Value)
+
+	if !ok {
+		return "", errors.New("session id is invalid")
 	}
 	return cookie.Value, nil
 }
@@ -77,7 +84,7 @@ func sessionIdCreator() string {
 
 func (s *Server) sessionIdFileServer(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("sessionPack")
+		cookie, err := r.Cookie("sessionID")
 		if err != nil {
 			if err == http.ErrNoCookie {
 				sid := sessionIdCreator()
@@ -86,7 +93,7 @@ func (s *Server) sessionIdFileServer(next http.Handler) http.Handler {
 					expiringTime: time.Now().Add(60 * time.Minute),
 				})
 				http.SetCookie(w, &http.Cookie{
-					Name:     "sessionPack",
+					Name:     "sessionID",
 					Value:    sid,
 					Path:     "/",
 					HttpOnly: true,
@@ -99,13 +106,28 @@ func (s *Server) sessionIdFileServer(next http.Handler) http.Handler {
 			}
 		} else {
 			http.SetCookie(w, &http.Cookie{
-				Name:     "sessionPack",
+				Name:     "sessionID",
 				Value:    cookie.Value,
 				Path:     "/",
 				HttpOnly: true,
 				Secure:   false,
 				MaxAge:   3600,
 			})
+		}
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (s *Server) sessionIdApi(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("sessionID")
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		_, ok := sessionPack.Load(cookie.Value)
+		if !ok {
+			http.Error(w, "there is no session id like that", http.StatusBadRequest)
 		}
 		next.ServeHTTP(w, r)
 	})

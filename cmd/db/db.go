@@ -25,7 +25,17 @@ func PatchUser(userID int, newPassword string, oldPassword string, securityAnswe
 	//TODO that will change the password of user, all control will be here and if there is error that function will return error
 }
 
+// gets username password then encrypt password from utilities package then check if there is a user like that, if not return 0 and error. username and passwords emptines and some other schnenigans will be handled in js of that form.
 func LoginUser(username string, password string) (int, error) {
 	return 0, nil
 	//TODO fill this function with fully functional one
+}
+
+// gets username and password then check if username is taken if not encrypts password and register user to a db
+func RegisterUser(username string, password string) error {
+	return nil
+}
+
+func GetUserByID(userID int) *utils.User {
+	return nil
 }

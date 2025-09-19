@@ -41,8 +41,8 @@ func (s *Server) RunServer() {
 
 	// server is streaming right here
 
-	err := http.ListenAndServe(s.serverAddr, &s.mux)
 	s.logger.Printf("server is started at %s port", s.serverAddr)
+	err := http.ListenAndServe(s.serverAddr, &s.mux)
 	if err != nil {
 		s.logger.Fatal(err)
 		log.Fatal(err)

@@ -52,3 +52,13 @@ func PostPost(title string, excerpt string, article string, userId string) error
 	// Create a post connectged to a userid and add creation time as dd/mm/yy do not add time for creation
 	return nil
 }
+
+func PutPost(userId string, title string, newArticle string, newExcerpt string) error {
+	//TODO check is userid is equal to a posts authors user id
+	return nil
+}
+
+func DeletePost(userId string, title string) error {
+	//TODO check if the request owner is a author of the post
+	return nil
+}

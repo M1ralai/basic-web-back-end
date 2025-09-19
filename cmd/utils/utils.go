@@ -21,4 +21,12 @@ type User struct {
 	Password string `json:"password" db:"password"`
 }
 
+type Post struct {
+	Title   string `json:"title" db:"title"`
+	Article string `json:"article" db:"article"`
+	Excerpt string `json:"excerpt" db:"excerpt"`
+	Author  string `json:"author" db:"author"`
+	Date    string `json:"date" db:"date"`
+}
+
 //TODO create a strcut as a posts for helping db and json return

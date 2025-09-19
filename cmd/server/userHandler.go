@@ -52,6 +52,9 @@ func (s *Server) userGetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sessionPack.Swap(sid, userID)
+
+	w.Write([]byte("successfully logged in"))
+	w.WriteHeader(http.StatusOK)
 }
 
 // This function basicly just changes users password
@@ -98,8 +101,8 @@ func (s *Server) userPatchHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	} else {
-		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("user password successfully changed"))
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 }
@@ -133,6 +136,8 @@ func (s *Server) userPutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Write([]byte("user successfully created please login"))
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (s *Server) userDeleteHandler(w http.ResponseWriter, r *http.Request) {
@@ -161,6 +166,9 @@ func (s *Server) userDeleteHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	db.DeleteUser(user_id)
+
+	w.Write([]byte("user successfuly deleted"))
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) getUserByID(w http.ResponseWriter, r *http.Request) {
@@ -185,6 +193,5 @@ func (s *Server) getUserByID(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(u)
-}
 
-//TODO add a posts handler
+}

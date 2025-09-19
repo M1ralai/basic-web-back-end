@@ -41,5 +41,14 @@ func GetUserByID(userID string) *utils.User {
 }
 
 func DeleteUser(userID string) {
-	return
+
+}
+
+func GetPosts(from int, destination int) ([]utils.User, error) {
+	return nil, nil
+}
+
+func PostPost(title string, excerpt string, article string, userId string) error {
+	// Create a post connectged to a userid and add creation time as dd/mm/yy do not add time for creation
+	return nil
 }

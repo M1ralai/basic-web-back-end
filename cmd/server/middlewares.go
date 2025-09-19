@@ -122,7 +122,7 @@ func (s *Server) sessionIdApi(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("sessionID")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			http.Error(w, "there is no sessionID", http.StatusInternalServerError)
 			return
 		}
 		_, ok := sessionPack.Load(cookie.Value)

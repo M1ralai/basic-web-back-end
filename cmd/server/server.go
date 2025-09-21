@@ -4,12 +4,14 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/M1iralai/deneme/cmd/db"
 	"github.com/M1iralai/deneme/cmd/utils"
 )
 
 type Server struct {
 	serverAddr string
 	logger     *log.Logger
+	db         *db.Database
 	mux        http.ServeMux
 }
 
@@ -18,6 +20,7 @@ func NewServer(addr string) *Server {
 		serverAddr: addr,
 		logger:     utils.NewLogger("server"),
 		mux:        *http.NewServeMux(),
+		db:         db.NewDB(),
 	}
 }
 

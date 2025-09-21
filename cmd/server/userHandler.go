@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-
-	"github.com/M1iralai/deneme/cmd/db"
 )
 
 func (s *Server) userHandler(w http.ResponseWriter, r *http.Request) {
@@ -42,7 +40,7 @@ func (s *Server) userGetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := db.LoginUser(username, password)
+	userID, err := s.db.LoginUser(username, password)
 
 	sid, err := s.getSessionId(r)
 
@@ -96,7 +94,7 @@ func (s *Server) userPatchHandler(w http.ResponseWriter, r *http.Request) {
 
 	securityQuestion, _ := data["securityAnswer"].(string)
 
-	err = db.PatchUser(userID, newPassowrd, oldPassword, securityQuestion)
+	err = s.db.PatchUser(userID, newPassowrd, oldPassword, securityQuestion)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -130,7 +128,7 @@ func (s *Server) userPutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := db.RegisterUser(username, password)
+	err := s.db.RegisterUser(username, password)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -165,7 +163,7 @@ func (s *Server) userDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	db.DeleteUser(user_id)
+	s.db.DeleteUser(user_id)
 
 	w.Write([]byte("user successfuly deleted"))
 	w.WriteHeader(http.StatusOK)
@@ -189,7 +187,7 @@ func (s *Server) getUserByID(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 
-	u := db.GetUserByID(id)
+	u := s.db.GetUserByID(id)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(u)

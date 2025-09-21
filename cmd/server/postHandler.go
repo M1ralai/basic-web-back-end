@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-
-	"github.com/M1iralai/deneme/cmd/db"
 )
 
 func (s *Server) postHandler(w http.ResponseWriter, r *http.Request) {
@@ -50,7 +48,7 @@ func (s *Server) getPostsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	posts, err := db.GetPosts(from, destination)
+	posts, err := s.db.GetPosts(from, destination)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -102,7 +100,7 @@ func (s *Server) postPostHandler(w http.ResponseWriter, r *http.Request) {
 
 	session, _ := sessionPack.Load(val)
 
-	err = db.PostPost(title, excerpt, article, session.(Session).userId)
+	err = s.db.PostPost(title, excerpt, article, session.(Session).userId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -154,7 +152,7 @@ func (s *Server) postPutHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.PutPost(uid.(Session).userId, title, article, excerpt)
+	err = s.db.PutPost(uid.(Session).userId, title, article, excerpt)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -192,7 +190,7 @@ func (s *Server) postDeleteHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = db.DeletePost(userId.(Session).userId, title)
+	err = s.db.DeletePost(userId.(Session).userId, title)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

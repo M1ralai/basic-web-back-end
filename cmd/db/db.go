@@ -1,27 +1,20 @@
 package db
 
 import (
-	"database/sql"
-	"log"
-
 	"github.com/M1iralai/deneme/cmd/utils"
 )
 
 type Database struct {
-	db     *sql.DB
-	logger *log.Logger
+	utils.Database
 }
 
 func NewDB() *Database {
-	return &Database{
-		logger: utils.NewLogger("database"),
-		db:     nil,
-	}
+	return &Database{}
 }
 
 func (db *Database) Initdb() {
-	db.logger = utils.NewLogger("database")
-	db.logger.Println("database successfully initialized")
+	db.SetLogger()
+	db.Logger.Println("database successfully initialized")
 }
 
 //TODO add a function that drops and recreate users table from useres.db, unique id and username, encrypted password

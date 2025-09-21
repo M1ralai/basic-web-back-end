@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"database/sql"
 	"log"
 	"os"
 )
@@ -13,6 +14,15 @@ func NewLogger(serviceName string) *log.Logger {
 	}
 	logger := log.New(file, "INFO: ", log.Ldate|log.Ltime|log.Ldate|log.Lshortfile)
 	return logger
+}
+
+type Database struct {
+	Db     *sql.DB
+	Logger *log.Logger
+}
+
+func (db *Database) SetLogger() {
+	db.Logger = NewLogger("database")
 }
 
 type User struct {

@@ -1,0 +1,43 @@
+name: Go CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    name: Build and Verify
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. Repo'yu klonla
+    - name: Checkout Repository
+      uses: actions/checkout@v3
+
+    # 2. Go ortamını ayarla
+    - name: Setup Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21' # Projede kullandığın Go versiyonuna göre ayarla
+
+    # 3. Bağımlılıkları indir
+    - name: Download Dependencies
+      run: go mod tidy
+
+    # 4. Kodun derlenip derlenmediğini kontrol et
+    - name: Build Code
+      run: go build ./...
+
+    # 5. Opsiyonel: Go vet ile statik analiz (hataları yakalamak için)
+    - name: Static Analysis
+      run: go vet ./...
+
+    # 6. Opsiyonel: Kodun formatını kontrol et (go fmt)
+    - name: Check Code Formatting
+      run: |
+        if [ -n "$(gofmt -l .)" ]; then
+          echo "Kodun formatlanması gerekiyor. 'gofmt -w .' çalıştır."
+          exit 1
+        fi
